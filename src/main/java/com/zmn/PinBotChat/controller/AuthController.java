@@ -29,10 +29,10 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@RequestBody RegistrationRequest request) {
         User user = authService.registerUser(request);
 
-        // Обычно сразу можно выдать токен после регистрации:
+        // Генерация токена после регистрации
         String token = jwtUtil.generateToken(user.getLogin(), user.getRole().name());
 
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name()));
+        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name(), user.getId()));
     }
 
     // Авторизация (логин)
@@ -40,9 +40,9 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         User user = authService.authenticateUser(request);
 
-        // Генерируем токен
+        // Генерация токена
         String token = jwtUtil.generateToken(user.getLogin(), user.getRole().name());
 
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name()));
+        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name(), user.getId()));
     }
 }
