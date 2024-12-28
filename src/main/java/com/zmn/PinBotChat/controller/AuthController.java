@@ -7,10 +7,7 @@ import com.zmn.PinBotChat.dto.RegistrationRequest;
 import com.zmn.PinBotChat.model.User;
 import com.zmn.PinBotChat.service.AuthService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -44,5 +41,11 @@ public class AuthController {
         String token = jwtUtil.generateToken(user.getLogin(), user.getRole().name());
 
         return ResponseEntity.ok(new AuthResponse(token, user.getRole().name(), user.getId()));
+    }
+
+    // Проверка доступности сервера
+    @GetMapping("/status")
+    public ResponseEntity<Void> status() {
+        return ResponseEntity.ok().build(); // Возвращает HTTP 200 без тела
     }
 }
