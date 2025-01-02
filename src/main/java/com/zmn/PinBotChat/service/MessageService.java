@@ -76,7 +76,8 @@ public class MessageService {
                         message.getSender().getId(),
                         message.getContent(),
                         message.getStatus().name(),
-                        message.getTimestamp().toString()
+                        message.getTimestamp().toString(),
+                        message.getAttachmentUrl()
                 ))
                 .collect(Collectors.toList());
     }
@@ -113,45 +114,54 @@ public class MessageService {
 
 
 
-    public String saveFile(MultipartFile file) throws IOException {
-        // Генерируем уникальное имя файла
+    public String saveFile(MultipartFile file, Long chatId, MessageType type) throws IOException {
+        // Определяем подпапку по типу
+        String subfolder = getSubfolderByType(type);
+
+        // Генерируем имя файла
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-        // Убедитесь, что директория существует
-        Path uploadPath = Paths.get(UPLOAD_DIR);
+        // Формируем путь: uploads/<chatId>/<subfolder>/
+        Path uploadPath = Paths.get(UPLOAD_DIR, String.valueOf(chatId), subfolder);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Сохраняем файл
+        // Полный путь к файлу
         Path filePath = uploadPath.resolve(fileName);
+
+        // Копируем содержимое
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return "/api/uploads/" + fileName;
+        // Формируем "URL" или относительный путь для attachmentUrl
+        // Например: "/api/uploads/chatId/subfolder/fileName"
+        // Или, если вы хотите общий REST-эндпоинт, можно так:
+        String url = String.format("%d/%s/%s", chatId, subfolder, fileName);
+
+        return url;
     }
 
     public Message uploadFile(MultipartFile file, CreateMessageRequest req) throws IOException {
 
-        // Отладочные сообщения
         System.out.println("----- Начало загрузки файла -----");
         System.out.println("Чат ID: " + req.getChatId());
         System.out.println("Отправитель ID: " + req.getSenderId());
         System.out.println("Тип сообщения: " + req.getType());
         System.out.println("Сохранение файла...");
 
-        // Сохраняем файл
-        String fileUrl = saveFile(file);
+        // Сохраняем файл с учётом структуры
+        String fileUrl = saveFile(file, req.getChatId(), req.getType());
 
         Chat chat = chatRepository.findById(req.getChatId())
                 .orElseThrow(() -> new RuntimeException("Chat not found: " + req.getChatId()));
         User sender = userRepository.findById(req.getSenderId())
                 .orElseThrow(() -> new RuntimeException("Sender not found: " + req.getSenderId()));
 
-        // Создаем сообщение с типом файла
         Message message = new Message();
         message.setChat(chat);
         message.setSender(sender);
-        message.setContent("File uploaded: " + file.getOriginalFilename());
+        // Если хотите вывести что-то осмысленное, например "Прикреплён файл ..."
+        message.setContent(req.getContent());
         message.setTimestamp(LocalDateTime.now());
         message.setStatus(MessageStatus.SENT);
         message.setType(req.getType() != null ? req.getType() : MessageType.TEXT);
@@ -163,5 +173,21 @@ public class MessageService {
     public Message saveMessage(Message message) {
         // Реализация сохранения сообщения в базу
         return messageRepository.save(message);
+    }
+
+    private String getSubfolderByType(MessageType type) {
+        if (type == null) {
+            return "other";
+        }
+        switch (type) {
+            case IMAGE:
+                return "images";
+            case VIDEO:
+                return "videos";
+            case AUDIO:
+                return "audio";
+            default:
+                return "other"; // или "files"
+        }
     }
 }

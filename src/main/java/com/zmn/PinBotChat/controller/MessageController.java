@@ -5,6 +5,7 @@ import com.zmn.PinBotChat.dto.SimplifiedMessageResponse;
 import com.zmn.PinBotChat.model.Message;
 import com.zmn.PinBotChat.model.MessageType;
 import com.zmn.PinBotChat.service.MessageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,41 +62,5 @@ public class MessageController {
         Message updated = messageService.updateStatus(messageId,
                 Enum.valueOf(com.zmn.PinBotChat.model.MessageStatus.class, status));
         return ResponseEntity.ok(updated);
-    }
-
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Message> uploadFile(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("chatId") Long chatId,
-            @RequestParam("senderId") Long senderId,
-            @RequestParam(value = "type", required = false, defaultValue = "TEXT") String type,
-            @RequestParam(value = "content", required = false, defaultValue = "File upload") String content,
-            @RequestParam(value = "replyToId", required = false) String replyToIdStr) {
-        try {
-            // Обработка параметра replyToId
-            Long replyToId = (replyToIdStr != null && !"null".equals(replyToIdStr)) ? Long.parseLong(replyToIdStr) : null;
-
-            // Создаем CreateMessageRequest из параметров URL
-            CreateMessageRequest request = new CreateMessageRequest();
-            request.setChatId(chatId);
-            request.setSenderId(senderId);
-            request.setType(MessageType.valueOf(type.toUpperCase()));
-            request.setContent(content);
-            request.setReplyToId(replyToId);
-
-            // Вызываем сервис
-            Message message = messageService.uploadFile(file, request);
-
-            return ResponseEntity.ok(message);
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка при преобразовании replyToId: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
     }
 }

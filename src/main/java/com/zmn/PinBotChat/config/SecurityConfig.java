@@ -48,8 +48,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // /api/auth/... — разрешаем без токена
-                        //.requestMatchers("/api/messages/**").permitAll() // /api/messages/... — разрешаем без токена
-                        //.requestMatchers("/api/files/**").permitAll() // /api/messages/... — разрешаем без токена
+                        .requestMatchers("/api/messages/**").permitAll() // /api/messages/... — разрешаем без токена
+                        .requestMatchers("/api/files/**").permitAll() // /api/messages/... — разрешаем без токена
                         .anyRequest().authenticated()                 // все остальные — только с токеном
                 )
                 .httpBasic(Customizer.withDefaults());

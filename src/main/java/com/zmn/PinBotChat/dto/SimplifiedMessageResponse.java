@@ -7,15 +7,17 @@ public class SimplifiedMessageResponse {
     private String content;
     private String status;
     private String timestamp;
+    private String attachmentUrl; // <-- добавляем поле для ссылки на вложение
 
     // Конструктор со всеми параметрами
-    public SimplifiedMessageResponse(Long id, Long chatId, Long senderId, String content, String status, String timestamp) {
+    public SimplifiedMessageResponse(Long id, Long chatId, Long senderId, String content, String status, String timestamp, String attachmentUrl) {
         this.id = id;
         this.chatId = chatId;
         this.senderId = senderId;
         this.content = content;
         this.status = status;
         this.timestamp = timestamp;
+        this.attachmentUrl = attachmentUrl;
     }
 
     // Геттеры и сеттеры
@@ -65,6 +67,14 @@ public class SimplifiedMessageResponse {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
     }
 }
 
