@@ -21,6 +21,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // Опционально: найти последние N сообщений в чате (например, для первого экрана)
     @Query("SELECT m FROM Message m WHERE m.chat.id = :chatId ORDER BY m.timestamp DESC")
-    List<Message> findTopNMessagesByChatId(@Param("chatId") Long chatId, Pageable pageable);
+    List<Message> findLastMessages(@Param("chatId") Long chatId, Pageable pageable);
+
 }
 

@@ -6,6 +6,9 @@ import com.zmn.PinBotChat.model.*;
 import com.zmn.PinBotChat.repository.ChatRepository;
 import com.zmn.PinBotChat.repository.MessageRepository;
 import com.zmn.PinBotChat.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,6 +84,12 @@ public class MessageService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    public List<Message> getLastMessages(Long chatId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "timestamp"));
+        return messageRepository.findLastMessages(chatId, pageable);
+    }
+
 
     // Редактировать сообщение
     public Message editMessage(Long messageId, String newContent) {

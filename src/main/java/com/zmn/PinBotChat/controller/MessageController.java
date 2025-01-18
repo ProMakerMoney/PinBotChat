@@ -39,6 +39,15 @@ public class MessageController {
         return ResponseEntity.ok(messages);
     }
 
+    // Получаем последние 10 сообщений
+    @GetMapping("/{chatId}/last")
+    public ResponseEntity<List<Message>> getLastMessages(
+            @PathVariable Long chatId,
+            @RequestParam(defaultValue = "10") int limit) {
+        List<Message> messages = messageService.getLastMessages(chatId, limit);
+        return ResponseEntity.ok(messages);
+    }
+
     // Редактирование сообщения (простой пример)
     @PutMapping("/{messageId}")
     public ResponseEntity<Message> editMessage(@PathVariable Long messageId,
